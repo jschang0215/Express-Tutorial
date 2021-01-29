@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../nodejs-mysql"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
