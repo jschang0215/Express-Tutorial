@@ -8,10 +8,9 @@ var template = require('./lib/template.js');
 var db = require('./lib/db.js');
 var helmet = require('helmet')
 
-app.use(helmet());
-
 var indexRouter = require('./router/index.js');
 var topicRouter = require('./router/topic.js');
+var loginRouter = require('./router/login.js');
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,6 +18,7 @@ app.use(compression());
 
 app.use('/', indexRouter);
 app.use('/topic', topicRouter);
+app.use('/login', loginRouter);
 
 app.get('*', function(req, res){
   res.status(404).send('Page not found');

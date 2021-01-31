@@ -5,10 +5,39 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var db = require('../lib/db.js');
 var router = express.Router();
+var cookie = require('cookie');
+
+function authIsOwner(request, response) {
+    var isOwner = false;
+    var cookies = {};
+    if(request.headers.cookie) {
+        cookies = cookie.parse(request.headers.cookie);
+    }
+
+    if(cookies.id === 'jschang0215' && cookies.pwd === '0215') {
+        isOwner = true;
+    }
+    return isOwner;
+}
+
+function authStatusUI(request, response) {
+    var isOwner = authIsOwner(request, response);
+    var authStatusUI = `<a href="/login/login_page">Login</a><br>`;
+    if(isOwner) {
+        authStatusUI = `<a href="/login/logout_process">Logout</a><br>`
+    }
+    return authStatusUI;
+}
 
 router.get('/create', function(request, response) {
     db.query('SELECT * FROM topic', function (error, topics, fields) {
         db.query('SELECT * FROM author', function (error, authors, fields) {
+            if(!authIsOwner(request, response)) {
+                response.writeHead(302, {Location: `/`});
+                response.end('Succcss');
+                return;
+            }
+
             var title = 'Create';
             var list = template.list(topics, title);
             var html = template.HTML(title, list, `
@@ -21,7 +50,7 @@ router.get('/create', function(request, response) {
                     <p><input type="submit" class="button"></p>
                 </form>
             </ul>
-            `, ` `);
+            `, ` `, authStatusUI(request, response));
             response.writeHead(200);
             response.end(html);
         });
@@ -73,7 +102,7 @@ router.get('/update/:topicId', function(request, response) {
                     <p><input type="submit"></p>
                 </form>
             </ul>
-            `, ` `);
+            `, ` `, authStatusUI(request, response));
             response.writeHead(200);
             response.end(html);
             });
@@ -140,7 +169,7 @@ router.get('/:topicId', function(request, response) {
             <input type="hidden" name="id" value="${sanitizedId}">
             <input type="submit" class="button"  value="Delete">
             </form>
-            `);
+            `, authStatusUI(request, response));
             response.send(html);
         });
     });
